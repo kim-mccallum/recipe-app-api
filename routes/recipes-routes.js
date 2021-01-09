@@ -7,4 +7,6 @@ router.get("/:rid", recipesControllers.getRecipeById);
 
 router.get("/user/:uid", recipesControllers.getRecipeByUserId);
 
+router.post("/", recipesControllers.createRecipe);
+
 module.exports = router;

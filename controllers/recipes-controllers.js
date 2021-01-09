@@ -1,3 +1,4 @@
+const { v4: uuidv4 } = require("uuid");
 const HttpError = require("../models/http-error");
 
 const DUMMY_RECIPES = [
@@ -56,5 +57,22 @@ const getRecipeByUserId = (req, res, next) => {
   res.json({ recipe });
 };
 
+const createRecipe = (req, res, next) => {
+  //use destructuring to get the fields out of the body
+  const { title, description, ingredients, instructions, creator } = req.body;
+  const createdRecipe = {
+    id: uuidv4(),
+    title,
+    description,
+    ingredients,
+    instructions,
+    creator,
+  };
+  DUMMY_RECIPES.push(createdRecipe);
+
+  res.status(201).json({ recipe: createdRecipe }); //201 is successfully created
+};
+
 exports.getRecipeById = getRecipeById;
 exports.getRecipeByUserId = getRecipeByUserId;
+exports.createRecipe = createRecipe;
