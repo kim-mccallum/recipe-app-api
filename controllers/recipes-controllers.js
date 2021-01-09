@@ -41,20 +41,20 @@ const getRecipeById = (req, res, next) => {
   res.json({ recipe });
 };
 
-const getRecipeByUserId = (req, res, next) => {
+const getRecipesByUserId = (req, res, next) => {
   const userId = req.params.uid;
   console.log(userId);
-  const recipe = DUMMY_RECIPES.find((r) => {
+  const recipes = DUMMY_RECIPES.filter((r) => {
     return r.creator === userId;
   });
-  console.log(recipe);
-  if (!recipe) {
+  console.log(recipes);
+  if (!recipes || recipes.length === 0) {
     throw new HttpError(
-      "Could not find a recipe for the provided user id.",
+      "Could not find any recipes for the provided user id.",
       404
     );
   }
-  res.json({ recipe });
+  res.json({ recipes });
 };
 
 const createRecipe = (req, res, next) => {
@@ -94,7 +94,7 @@ const deleteRecipe = (req, res, next) => {
 };
 
 exports.getRecipeById = getRecipeById;
-exports.getRecipeByUserId = getRecipeByUserId;
+exports.getRecipesByUserId = getRecipesByUserId;
 exports.createRecipe = createRecipe;
 exports.updateRecipe = updateRecipe;
 exports.deleteRecipe = deleteRecipe;
