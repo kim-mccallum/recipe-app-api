@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 
 const recipesRoutes = require("./routes/recipes-routes");
+const HttpError = require("./models/http-error");
 
 const app = express();
 
@@ -9,6 +10,12 @@ const app = express();
 app.use(bodyParser.json());
 
 app.use("/api/recipes", recipesRoutes);
+
+//middleware to catch requests to unsupported routes
+app.use((req, res, next) => {
+  const error = new HttpError("Could not find this route.", 404);
+  throw error;
+});
 
 //error handling in express - adding error means that this function only triggers with an error
 app.use((error, req, res, next) => {

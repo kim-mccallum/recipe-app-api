@@ -73,6 +73,24 @@ const createRecipe = (req, res, next) => {
   res.status(201).json({ recipe: createdRecipe }); //201 is successfully created
 };
 
+const updateRecipe = (req, res, next) => {
+  const { title, description, ingredients, instructions } = req.body;
+  const recipeId = req.params.rid;
+  const updatedRecipe = { ...DUMMY_RECIPES.find((r) => r.id === recipeId) };
+  const recipeIndex = DUMMY_RECIPES.findIndex((r) => r.id === recipeId);
+  updatedRecipe.title = title;
+  updatedRecipe.description = description;
+  updatedRecipe.ingredients = ingredients;
+  updatedRecipe.instructions = instructions;
+  DUMMY_RECIPES[recipeIndex] = updatedRecipe;
+  //response
+  res.status(200).json({ recipe: updatedRecipe });
+};
+
+const deleteRecipe = (req, res, next) => {};
+
 exports.getRecipeById = getRecipeById;
 exports.getRecipeByUserId = getRecipeByUserId;
 exports.createRecipe = createRecipe;
+exports.updateRecipe = updateRecipe;
+exports.deleteRecipe = deleteRecipe;
