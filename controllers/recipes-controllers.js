@@ -1,7 +1,7 @@
 const { v4: uuidv4 } = require("uuid");
 const HttpError = require("../models/http-error");
 
-const DUMMY_RECIPES = [
+let DUMMY_RECIPES = [
   {
     id: "r1",
     title: "Apple with almond butter",
@@ -87,7 +87,11 @@ const updateRecipe = (req, res, next) => {
   res.status(200).json({ recipe: updatedRecipe });
 };
 
-const deleteRecipe = (req, res, next) => {};
+const deleteRecipe = (req, res, next) => {
+  const recipeId = req.params.rid;
+  DUMMY_RECIPES = DUMMY_RECIPES.filter((r) => r.id !== recipeId);
+  res.status(200).json({ message: `Deleted recipe: ${recipeId}` });
+};
 
 exports.getRecipeById = getRecipeById;
 exports.getRecipeByUserId = getRecipeByUserId;
