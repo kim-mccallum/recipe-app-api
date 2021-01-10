@@ -19,7 +19,16 @@ router.post(
   recipesControllers.createRecipe
 );
 
-router.patch("/:rid", recipesControllers.updateRecipe);
+router.patch(
+  "/:rid",
+  [
+    check("title").not().isEmpty(),
+    check("description").isLength({ min: 5 }),
+    check("ingredients").isLength({ min: 5 }),
+    check("instructions").isLength({ min: 5 }),
+  ],
+  recipesControllers.updateRecipe
+);
 
 router.delete("/:rid", recipesControllers.deleteRecipe);
 

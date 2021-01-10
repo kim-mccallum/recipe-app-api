@@ -82,6 +82,12 @@ const createRecipe = (req, res, next) => {
 };
 
 const updateRecipe = (req, res, next) => {
+  //validate
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    console.log(errors);
+    throw new HttpError("Invalid inputs passed, please check your data.", 422);
+  }
   const { title, description, ingredients, instructions } = req.body;
   const recipeId = req.params.rid;
   const updatedRecipe = { ...DUMMY_RECIPES.find((r) => r.id === recipeId) };
@@ -97,6 +103,9 @@ const updateRecipe = (req, res, next) => {
 
 const deleteRecipe = (req, res, next) => {
   const recipeId = req.params.rid;
+  if (!DUMMY_RECIPES.find((r) => r.id === recipeId)) {
+    throw new HttpError("Could not find that id.", 404);
+  }
   DUMMY_RECIPES = DUMMY_RECIPES.filter((r) => r.id !== recipeId);
   res.status(200).json({ message: `Deleted recipe: ${recipeId}` });
 };
