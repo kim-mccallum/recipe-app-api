@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 
 const recipesRoutes = require("./routes/recipes-routes");
+const usersRoutes = require("./routes/users-routes");
 const HttpError = require("./models/http-error");
 
 const app = express();
@@ -10,6 +11,7 @@ const app = express();
 app.use(bodyParser.json());
 
 app.use("/api/recipes", recipesRoutes);
+app.use("/api/users", usersRoutes);
 
 //middleware to catch requests to unsupported routes
 app.use((req, res, next) => {
