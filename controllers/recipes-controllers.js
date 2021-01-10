@@ -1,4 +1,5 @@
 const { v4: uuidv4 } = require("uuid");
+const { validationResult } = require("express-validator");
 const HttpError = require("../models/http-error");
 
 let DUMMY_RECIPES = [
@@ -58,6 +59,13 @@ const getRecipesByUserId = (req, res, next) => {
 };
 
 const createRecipe = (req, res, next) => {
+  //look for errors
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    console.log(errors);
+    throw new HttpError("Invalid inputs passed, please check your data.", 422);
+  }
+
   //use destructuring to get the fields out of the body
   const { title, description, ingredients, instructions, creator } = req.body;
   const createdRecipe = {
