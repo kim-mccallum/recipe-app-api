@@ -1,6 +1,7 @@
 const { v4: uuidv4 } = require("uuid");
 const { validationResult } = require("express-validator");
 const HttpError = require("../models/http-error");
+const Recipe = require("../models/recipe");
 
 let DUMMY_RECIPES = [
   {
@@ -58,7 +59,7 @@ const getRecipesByUserId = (req, res, next) => {
   res.json({ recipes });
 };
 
-const createRecipe = (req, res, next) => {
+const createRecipe = async (req, res, next) => {
   //look for errors
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -68,15 +69,26 @@ const createRecipe = (req, res, next) => {
 
   //use destructuring to get the fields out of the body
   const { title, description, ingredients, instructions, creator } = req.body;
-  const createdRecipe = {
-    id: uuidv4(),
+  //UPDATE
+  const createdRecipe = new Recipe({
     title,
     description,
     ingredients,
     instructions,
+    image:
+      "https://www.chelanfresh.com/wp-content/uploads/2019/08/Lucy-Glo_NEW1.png",
     creator,
-  };
-  DUMMY_RECIPES.push(createdRecipe);
+  });
+
+  try {
+    await createdRecipe.save();
+  } catch (err) {
+    const error = new HttpError(
+      "Creating recipe failed, please try again.",
+      500
+    );
+    return next(error);
+  }
 
   res.status(201).json({ recipe: createdRecipe }); //201 is successfully created
 };
