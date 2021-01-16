@@ -43,20 +43,27 @@ const getRecipeById = (req, res, next) => {
   res.json({ recipe });
 };
 
-const getRecipesByUserId = (req, res, next) => {
+const getRecipesByUserId = async (req, res, next) => {
   const userId = req.params.uid;
-  console.log(userId);
-  const recipes = DUMMY_RECIPES.filter((r) => {
-    return r.creator === userId;
-  });
-  console.log(recipes);
+
+  let recipes;
+  try {
+    recipes = await Recipe.find({ creator: userId }); //mongoose returns array but MongoDB would return cursor
+  } catch (err) {
+    const error = new HttpError(
+      "Fetching recipes for that user failed. Please try again later.",
+      500
+    );
+    return next(error);
+  }
+  // Check results before sending response
   if (!recipes || recipes.length === 0) {
-    throw new HttpError(
-      "Could not find any recipes for the provided user id.",
-      404
+    return next(
+      new HttpError("Could not find any recipes for the provided user id.", 404)
     );
   }
-  res.json({ recipes });
+
+  res.json({ recipes: recipes.map((r) => r.toObject({ getters: true })) });
 };
 
 const createRecipe = async (req, res, next) => {
@@ -76,7 +83,7 @@ const createRecipe = async (req, res, next) => {
     ingredients,
     instructions,
     image:
-      "https://www.chelanfresh.com/wp-content/uploads/2019/08/Lucy-Glo_NEW1.png",
+      "https://www.chelanfresh.com/wp-content/uploads/2019/08/Lucy-Glo_NEW1.png", //hardcoded for now until we add file upload
     creator,
   });
 
@@ -93,24 +100,44 @@ const createRecipe = async (req, res, next) => {
   res.status(201).json({ recipe: createdRecipe }); //201 is successfully created
 };
 
-const updateRecipe = (req, res, next) => {
-  //validate
+const updateRecipe = async (req, res, next) => {
+  //look for errors
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     console.log(errors);
     throw new HttpError("Invalid inputs passed, please check your data.", 422);
   }
-  const { title, description, ingredients, instructions } = req.body;
+  //extract the id
   const recipeId = req.params.rid;
-  const updatedRecipe = { ...DUMMY_RECIPES.find((r) => r.id === recipeId) };
-  const recipeIndex = DUMMY_RECIPES.findIndex((r) => r.id === recipeId);
-  updatedRecipe.title = title;
-  updatedRecipe.description = description;
-  updatedRecipe.ingredients = ingredients;
-  updatedRecipe.instructions = instructions;
-  DUMMY_RECIPES[recipeIndex] = updatedRecipe;
-  //response
-  res.status(200).json({ recipe: updatedRecipe });
+  // get the new parameters
+  const { title, description, ingredients, instructions } = req.body;
+
+  let recipe;
+  try {
+    recipe = await Recipe.findById(recipeId);
+  } catch (err) {
+    const error = new HttpError(
+      "Something went wrong, could not update recipe",
+      500
+    );
+    return next(error);
+  }
+  recipe.title = title;
+  recipe.description = description;
+  recipe.ingredients = ingredients;
+  recipe.instructions = instructions;
+  //Store the data in the DB
+  try {
+    await recipe.save();
+  } catch (err) {
+    const error = new HttpError(
+      "Something went wrong, could not update recipe.",
+      500
+    );
+    return next(error);
+  }
+  // return the response
+  res.status(200).json({ recipe: recipe.toObject({ getters: true }) });
 };
 
 const deleteRecipe = (req, res, next) => {
