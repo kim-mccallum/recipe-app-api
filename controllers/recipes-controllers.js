@@ -140,12 +140,29 @@ const updateRecipe = async (req, res, next) => {
   res.status(200).json({ recipe: recipe.toObject({ getters: true }) });
 };
 
-const deleteRecipe = (req, res, next) => {
+const deleteRecipe = async (req, res, next) => {
   const recipeId = req.params.rid;
-  if (!DUMMY_RECIPES.find((r) => r.id === recipeId)) {
-    throw new HttpError("Could not find that id.", 404);
+
+  let recipe;
+  try {
+    recipe = await Recipe.findById(recipeId);
+  } catch (err) {
+    const error = new HttpError(
+      "Something went wrong. Could not delete that recipe.",
+      500
+    );
+    return next(error);
   }
-  DUMMY_RECIPES = DUMMY_RECIPES.filter((r) => r.id !== recipeId);
+
+  try {
+    await recipe.remove();
+  } catch (err) {
+    const error = new HttpError(
+      "Something went wrong. Could not delete that recipe",
+      500
+    );
+    return next(error);
+  }
   res.status(200).json({ message: `Deleted recipe: ${recipeId}` });
 };
 
