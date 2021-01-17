@@ -7,7 +7,7 @@ const recipeSchema = new Schema({
   image: { type: String, required: true },
   ingredients: { type: String, required: true },
   instructions: { type: String, required: true },
-  creator: { type: String, required: true },
+  creator: { type: mongoose.Types.ObjectId, required: true, ref: "User" },
 });
 
 module.exports = mongoose.model("Recipe", recipeSchema);

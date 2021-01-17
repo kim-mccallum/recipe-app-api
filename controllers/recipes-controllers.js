@@ -1,7 +1,9 @@
 const { v4: uuidv4 } = require("uuid");
 const { validationResult } = require("express-validator");
+const mongoose = require("mongoose");
 const HttpError = require("../models/http-error");
 const Recipe = require("../models/recipe");
+const User = require("../models/user");
 
 let DUMMY_RECIPES = [
   {
@@ -87,9 +89,34 @@ const createRecipe = async (req, res, next) => {
     creator,
   });
 
+  let user;
+
   try {
-    await createdRecipe.save();
+    user = await User.findById(creator);
   } catch (err) {
+    const error = new HttpError(
+      "Creating recipe failed. Please try again.",
+      500
+    );
+    return next(error);
+  }
+
+  if (!user) {
+    const error = new HttpError("Could not find user for that id.", 404);
+    return next(error);
+  }
+  console.log(user);
+
+  try {
+    //we need to do two things at once so we use a transaction in a session
+    const sess = await mongoose.startSession();
+    sess.startTransaction();
+    await createdRecipe.save({ session: sess }); //stored the place
+    user.recipes.push(createdRecipe); //special mongoose push - grabs place id and adds to user
+    await user.save({ session: sess });
+    await sess.commitTransaction(); //save changes to DB - if any one fails, everything rolls back
+  } catch (err) {
+    console.log(err);
     const error = new HttpError(
       "Creating recipe failed, please try again.",
       500
