@@ -174,7 +174,7 @@ const deleteRecipe = async (req, res, next) => {
 
   let recipe;
   try {
-    recipe = await Recipe.findById(recipeId);
+    recipe = await Recipe.findById(recipeId).populate("creator"); //populate allows you to refer to data in another collection if they are connected
   } catch (err) {
     const error = new HttpError(
       "Something went wrong. Could not delete that recipe.",
@@ -183,8 +183,19 @@ const deleteRecipe = async (req, res, next) => {
     return next(error);
   }
 
+  if (!recipe) {
+    const error = new HttpError("Could not find that recipe.", 404);
+    return next(error);
+  }
+
   try {
-    await recipe.remove();
+    // use a session and transaction
+    const sess = await mongoose.startSession();
+    sess.startTransaction();
+    await recipe.remove({ session: sess }); //remove recipe
+    recipe.creator.recipes.pull(recipe); //pull also removes the id
+    await recipe.creator.save({ session: sess });
+    await sess.commitTransaction(); //save changes to DB
   } catch (err) {
     const error = new HttpError(
       "Something went wrong. Could not delete that recipe",
