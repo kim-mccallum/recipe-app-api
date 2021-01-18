@@ -8,7 +8,7 @@ const userSchema = new Schema({
   email: { type: String, required: true, unique: true }, //unique makes an index NOT validate unique
   password: { type: String, required: true, minlength: 6 },
   image: { type: String, required: true }, // don't store files in the DB
-  recipes: [{ type: mongoose.Types.ObjectId, required: true, ref: "Place" }], //array to support multiple
+  recipes: [{ type: mongoose.Types.ObjectId, required: true, ref: "Recipe" }], //array to support multiple
 });
 
 userSchema.plugin(uniqueValidator); //ensures that the email is unique

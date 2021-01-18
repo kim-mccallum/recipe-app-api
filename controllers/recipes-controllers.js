@@ -48,10 +48,11 @@ const getRecipeById = (req, res, next) => {
 const getRecipesByUserId = async (req, res, next) => {
   const userId = req.params.uid;
 
-  let recipes;
+  let userWithRecipes;
   try {
-    recipes = await Recipe.find({ creator: userId }); //mongoose returns array but MongoDB would return cursor
+    userWithRecipes = await User.findById(userId).populate("recipes");
   } catch (err) {
+    console.log(err);
     const error = new HttpError(
       "Fetching recipes for that user failed. Please try again later.",
       500
@@ -59,13 +60,15 @@ const getRecipesByUserId = async (req, res, next) => {
     return next(error);
   }
   // Check results before sending response
-  if (!recipes || recipes.length === 0) {
+  if (!userWithRecipes || userWithRecipes.recipes.length === 0) {
     return next(
       new HttpError("Could not find any recipes for the provided user id.", 404)
     );
   }
 
-  res.json({ recipes: recipes.map((r) => r.toObject({ getters: true })) });
+  res.json({
+    recipes: userWithRecipes.recipes.map((r) => r.toObject({ getters: true })),
+  });
 };
 
 const createRecipe = async (req, res, next) => {
