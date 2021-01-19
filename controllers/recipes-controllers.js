@@ -75,8 +75,9 @@ const createRecipe = async (req, res, next) => {
   //look for errors
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    console.log(errors);
-    throw new HttpError("Invalid inputs passed, please check your data.", 422);
+    return next(
+      new HttpError("Invalid inputs passed, please check your data.", 422)
+    );
   }
 
   //use destructuring to get the fields out of the body
