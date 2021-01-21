@@ -32,17 +32,24 @@ let DUMMY_RECIPES = [
     creator: "u2",
   },
 ];
-const getRecipeById = (req, res, next) => {
+const getRecipeById = async (req, res, next) => {
   const recipeId = req.params.rid;
-  const recipe = DUMMY_RECIPES.find((r) => {
-    return r.id === recipeId;
-  });
+  let recipe;
+  try {
+    recipe = await Recipe.findById(recipeId);
+  } catch (err) {
+    const error = new HttpError(
+      "Something went wrong, could not find that recipe",
+      500
+    );
+    return next(error);
+  }
 
   if (!recipe) {
     // return to stop execution if there is an error
     throw new HttpError("Could not find a recipe for the provided id.", 404);
   }
-  res.json({ recipe });
+  res.json({ recipe: recipe.toObject({ getters: true }) });
 };
 
 const getRecipesByUserId = async (req, res, next) => {
