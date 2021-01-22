@@ -1,17 +1,7 @@
-const { v4: uuidv4 } = require("uuid");
 const { validationResult } = require("express-validator");
 
 const HttpError = require("../models/http-error");
 const User = require("../models/user");
-
-const DUMMY_USERS = [
-  {
-    id: "u1",
-    name: "Dyno Kitty",
-    email: "orangeTabby@coolcat.com",
-    password: "testPW",
-  },
-];
 
 const getUsers = async (req, res, next) => {
   let users;
@@ -38,7 +28,7 @@ const signup = async (req, res, next) => {
   }
   const { name, email, password } = req.body;
 
-  //only unique users - CHANGE
+  //only unique users
   let existingUser;
 
   try {

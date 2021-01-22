@@ -55,6 +55,8 @@ const getRecipeById = async (req, res, next) => {
 const getRecipesByUserId = async (req, res, next) => {
   const userId = req.params.uid;
 
+  console.log(userId);
+
   let userWithRecipes;
   try {
     userWithRecipes = await User.findById(userId).populate("recipes");
