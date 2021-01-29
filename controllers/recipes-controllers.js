@@ -97,8 +97,7 @@ const createRecipe = async (req, res, next) => {
     description,
     ingredients,
     instructions,
-    image:
-      "https://www.chelanfresh.com/wp-content/uploads/2019/08/Lucy-Glo_NEW1.png", //hardcoded for now until we add file upload
+    image: req.file.path, //path on the server
     creator,
   });
 
