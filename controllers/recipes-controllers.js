@@ -1,37 +1,10 @@
-const { v4: uuidv4 } = require("uuid");
+const fs = require("fs");
 const { validationResult } = require("express-validator");
 const mongoose = require("mongoose");
 const HttpError = require("../models/http-error");
 const Recipe = require("../models/recipe");
 const User = require("../models/user");
 
-let DUMMY_RECIPES = [
-  {
-    id: "r1",
-    title: "Apple with almond butter",
-    description: "Perfect, filling snack on the go!",
-    imageUrl:
-      "https://www.chelanfresh.com/wp-content/uploads/2019/08/Lucy-Glo_NEW1.png",
-    ingredients:
-      "Apple (pink lady, honey crisp or Lucy Glo), 2 Tablespoons of almond butter",
-    instructions:
-      "Slice the apple (optional), smear almond butter on it and eat it!",
-    creator: "u1",
-  },
-  {
-    id: "r2",
-    title: "Avocado Toast",
-    description:
-      "Quick filling snack with whole grain bread and rich, delicious avocado!",
-    imageUrl:
-      "https://fsi.colostate.edu/wp-content/uploads/2016/02/Coveravocado.jpg",
-    ingredients:
-      "2 slices of sprouted whole grain bread, 0.5 ripe avocado, 1 tablespoon nutritional yeast.",
-    instructions:
-      "Toast the bread. Slice the avocado in the skin, scoop it out with a fork and smash it onto the bread. Sprinkle with nutritional yeast and serve.",
-    creator: "u2",
-  },
-];
 const getRecipeById = async (req, res, next) => {
   const recipeId = req.params.rid;
   let recipe;
@@ -200,6 +173,8 @@ const deleteRecipe = async (req, res, next) => {
     return next(error);
   }
 
+  const imagePath = recipe.image;
+
   try {
     // use a session and transaction
     const sess = await mongoose.startSession();
@@ -215,6 +190,11 @@ const deleteRecipe = async (req, res, next) => {
     );
     return next(error);
   }
+
+  fs.unlink(imagePath, (err) => {
+    console.log(err); //delete file
+  });
+
   res.status(200).json({ message: `Deleted recipe: ${recipeId}` });
 };
 
