@@ -1,6 +1,7 @@
 const express = require("express");
 const { check } = require("express-validator");
 const fileUpload = require("../middleware/file-upload");
+const checkAuth = require("../middleware/check-auth");
 
 const recipesControllers = require("../controllers/recipes-controllers");
 
@@ -9,6 +10,9 @@ const router = express.Router();
 router.get("/:rid", recipesControllers.getRecipeById);
 
 router.get("/user/:uid", recipesControllers.getRecipesByUserId);
+//add protected routes after the above which are not protected
+//middleware that checks for valid token
+router.use(checkAuth);
 
 router.post(
   "/",
