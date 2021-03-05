@@ -136,6 +136,15 @@ const updateRecipe = async (req, res, next) => {
     );
     return next(error);
   }
+  //only let users edit their own recipes
+  if (recipe.creator.toString() !== req.userData.userId) {
+    const error = new HttpError(
+      "You are not allowed to edit this recipe.",
+      401
+    );
+    return next(error);
+  }
+
   recipe.title = title;
   recipe.description = description;
   recipe.ingredients = ingredients;
@@ -170,6 +179,14 @@ const deleteRecipe = async (req, res, next) => {
 
   if (!recipe) {
     const error = new HttpError("Could not find that recipe.", 404);
+    return next(error);
+  }
+
+  if (recipe.creator.id !== req.userData.userId) {
+    const error = new HttpError(
+      "You are not allowed to delete this recipe.",
+      401
+    );
     return next(error);
   }
 
