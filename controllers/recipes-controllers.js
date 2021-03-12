@@ -63,7 +63,7 @@ const createRecipe = async (req, res, next) => {
   }
 
   //use destructuring to get the fields out of the body
-  const { title, description, ingredients, instructions, creator } = req.body;
+  const { title, description, ingredients, instructions } = req.body;
   //UPDATE
   const createdRecipe = new Recipe({
     title,
@@ -71,13 +71,13 @@ const createRecipe = async (req, res, next) => {
     ingredients,
     instructions,
     image: req.file.path, //path on the server
-    creator,
+    creator: req.userData.userId,
   });
 
   let user;
 
   try {
-    user = await User.findById(creator);
+    user = await User.findById(req.userData.userId);
   } catch (err) {
     const error = new HttpError(
       "Creating recipe failed. Please try again.",
