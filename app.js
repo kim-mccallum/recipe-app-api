@@ -56,7 +56,7 @@ app.use((error, req, res, next) => {
 //if you can connect to DB then start the server
 mongoose
   .connect(
-    `mongodb+srv://${DB_USER}:${DB_PW}@cluster0.f0ild.mongodb.net/mern-recipes?retryWrites=true&w=majority`
+    `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.f0ild.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`
   )
   .then(() => {
     app.listen(5000);
