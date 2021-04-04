@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const HttpError = require("../models/http-error");
 const Recipe = require("../models/recipe");
 const User = require("../models/user");
+const fileDelete = require("../util/file-delete");
 
 const getRecipeById = async (req, res, next) => {
   const recipeId = req.params.rid;
@@ -70,7 +71,8 @@ const createRecipe = async (req, res, next) => {
     description,
     ingredients,
     instructions,
-    image: req.file.path, //path on the server
+    // image: req.file.path, //path on the server
+    image: req.file.location,
     creator: req.userData.userId,
   });
 
@@ -208,9 +210,10 @@ const deleteRecipe = async (req, res, next) => {
     return next(error);
   }
 
-  fs.unlink(imagePath, (err) => {
-    console.log(err); //delete file
-  });
+  fileDelete(imagePath);
+  // fs.unlink(imagePath, (err) => {
+  //   console.log(err); //delete file
+  // });
 
   res.status(200).json({ message: `Deleted recipe: ${recipeId}` });
 };

@@ -9,6 +9,7 @@ require("dotenv").config();
 const recipesRoutes = require("./routes/recipes-routes");
 const usersRoutes = require("./routes/users-routes");
 const HttpError = require("./models/http-error");
+const fileDelete = require("./util/file-delete");
 const DB_USER = process.env.DB_USER;
 const DB_PW = process.env.DB_PW;
 
@@ -16,7 +17,7 @@ const app = express();
 
 //parse the body of the incoming request before you pass it to all the routes
 app.use(bodyParser.json());
-app.use("/uploads/images", express.static(path.join("uploads", "images"))); //add middleware to serve static images
+// app.use("/uploads/images", express.static(path.join("uploads", "images"))); //add middleware to serve static images
 
 // add middleware to handle CORS
 app.use((req, res, next) => {
@@ -41,9 +42,10 @@ app.use((req, res, next) => {
 //error handling in express - adding error means that this function only triggers with an error
 app.use((error, req, res, next) => {
   if (req.file) {
-    fs.unlink(req.file.path, (err) => {
-      console.log(err);
-    }); //delete the file from the request
+    fileDelete(req.file.location);
+    // fs.unlink(req.file.path, (err) => {
+    //   console.log(err);
+    // }); //delete the file from the request
   }
   //you can only send one response
   if (res.headerSent) {
